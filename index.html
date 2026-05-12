@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxima - Kişisel Verimlilik Merkezi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <button class="mobile-toggle btn-icon" onclick="toggleMobileMenu()" aria-label="Menüyü Aç/Kapat">
+        <i class="fa-solid fa-bars" style="font-size: 24px;"></i>
+    </button>
+
+    <aside class="sidebar glass" id="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-bolt"></i> Proxima
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-item active" data-target="dashboard">
+                <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </div>
+            <div class="nav-item" data-target="tasks">
+                <i class="fa-solid fa-list-check"></i> Görevler
+            </div>
+            <div class="nav-item" data-target="calendar">
+                <i class="fa-regular fa-calendar-days"></i> Takvim
+            </div>
+            <div class="nav-item" data-target="pomodoro">
+                <i class="fa-solid fa-stopwatch"></i> Pomodoro
+            </div>
+            <div class="nav-item" data-target="habits">
+                <i class="fa-solid fa-seedling"></i> Alışkanlıklar
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="nav-item" onclick="openModal('categoryModal')">
+                <i class="fa-solid fa-tags"></i> Kategoriler
+            </div>
+            <div class="nav-item" onclick="openModal('settingsModal')">
+                <i class="fa-solid fa-gear"></i> Ayarlar & Yedek
+            </div>
+        </nav>
+        
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="fa-solid fa-moon"></i> <span>Tema Değiştir</span>
+        </button>
+    </aside>
+
+    <main class="main-content">
+        
+        <section id="dashboard" class="section active">
+            <div class="header">
+                <div>
+                    <h1>Merhaba! 👋</h1>
+                    <div class="date-display" id="dash-date">Tarih yükleniyor...</div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-glass" onclick="toggleMiniTasks()" title="Hızlı Görevler Widget'ı (Her Zaman Üstte)">
+                        <i class="fa-solid fa-expand"></i> Mini Mod
+                    </button>
+                    <button class="btn btn-glass" onclick="testNotification()" title="Ses ve Bildirim İznini Test Et">
+                        <i class="fa-solid fa-bell"></i>
+                    </button>
+                    <button class="btn btn-primary" onclick="openTaskModal()">
+                        <i class="fa-solid fa-plus"></i> Yeni Görev
+                    </button>
+                </div>
+            </div>
+
+            <div class="quick-stats-bar glass" style="margin-bottom: 24px;">
+                <div class="stat-item">
+                    <div class="stat-icon-small blue"><i class="fa-solid fa-check-double"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-value" id="stat-completed">0</span>
+                        <span class="stat-label">Tamamlanan</span>
+                    </div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-icon-small green"><i class="fa-solid fa-list-check"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-value" id="stat-pending">0</span>
+                        <span class="stat-label">Bekleyen İş</span>
+                    </div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-icon-small orange"><i class="fa-solid fa-clock"></i></div>
+                    <div class="stat-details">
+                        <span class="stat-value" id="stat-pomo">0</span>
+                        <span class="stat-label">Odak Seansı</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="stat-card glass chart-card" style="margin-bottom: 32px; display: flex; flex-direction: column;">
+                    <div style="width: 100%;">
+                        <div class="flex-between mb-8">
+                            <span class="section-subtitle" style="font-size: 15px;">Son 7 Günlük Üretkenlik</span>
+                            <span class="text-sm text-muted">Tamamlanan Görev Sayısı</span>
+                        </div>
+                        <div class="bar-chart" id="weekly-chart"></div>
+                    </div>
+                </div>
+
+                <div class="glass flex-column" style="padding: 24px;">
+                    <h2 class="section-subtitle" style="margin-bottom: 20px;">Alışkanlık Durumu</h2>
+                    <div id="dash-habit-list" class="habit-list-compact"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tasks" class="section">
+            <div class="header">
+                <div>
+                    <h1>Görev Yönetimi</h1>
+                    <p class="date-display">Tüm işlerini organize et, filtrele ve takip et.</p>
+                </div>
+                <button class="btn btn-primary" onclick="openTaskModal()">
+                    <i class="fa-solid fa-plus"></i> Görev Ekle
+                </button>
+            </div>
+            
+            <div class="glass container-pad min-h-70">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Görevlerde ara..." onkeyup="filterTasks()">
+                    </div>
+                    <select id="filterCategory" class="form-control w-auto" onchange="filterTasks()">
+                        <option value="all">Tüm Kategoriler</option>
+                    </select>
+                    <select id="filterStatus" class="form-control w-auto" onchange="filterTasks()">
+                        <option value="all">Tüm Durumlar</option>
+                        <option value="pending">Bekleyenler</option>
+                        <option value="completed">Tamamlananlar</option>
+                    </select>
+                </div>
+                <div class="task-list" id="main-task-list"></div>
+            </div>
+        </section>
+
+        <section id="calendar" class="section">
+            <div class="header">
+                <div>
+                    <h1>Takvim</h1>
+                    <p class="date-display">Görevleri günlerin üzerine sürükleyerek tarihini değiştirebilirsin.</p>
+                </div>
+                <div class="calendar-nav">
+                    <button class="btn btn-glass" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h2 id="currentMonthYear">Ay Yıl</h2>
+                    <button class="btn btn-glass" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="glass container-pad">
+                <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+        </section>
+
+        <section id="pomodoro" class="section">
+            <div class="header">
+                <div>
+                    <h1>Odaklanma Zamanı</h1>
+                    <p class="date-display">Dikkatin dağılmadan hedeflerine ulaş.</p>
+                </div>
+            </div>
+            <div class="pomodoro-container glass container-pad">
+                <div class="timer-options">
+                    <button class="btn-timer-opt active" onclick="setTimer(25, 'Pomodoro', this)">Pomodoro (25 dk)</button>
+                    <button class="btn-timer-opt" onclick="setTimer(5, 'Kısa Mola', this)">Kısa Mola (5 dk)</button>
+                    <button class="btn-timer-opt" onclick="setTimer(15, 'Uzun Mola', this)">Uzun Mola (15 dk)</button>
+                    <button class="btn-timer-opt" onclick="toggleCustomTimer()">Özel Süre</button>
+                </div>
+                
+                <div id="customTimerDiv" class="custom-timer-inputs" style="display: none;">
+                    <input type="number" id="customMin" class="form-control text-center" placeholder="Dk" min="1" max="120" value="45">
+                    <span style="font-weight: bold; font-size: 24px;">:</span>
+                    <input type="number" id="customSec" class="form-control text-center" placeholder="Sn" min="0" max="59" value="0">
+                    <button class="btn btn-primary" onclick="setCustomTimer()">Uygula</button>
+                </div>
+
+                <div class="timer-circle" id="timerCircle">
+                    <div class="time-display" id="time-display">25:00</div>
+                    <div class="timer-type" id="timer-type">POMODORO</div>
+                </div>
+
+                <div class="timer-controls">
+                    <button class="btn btn-primary btn-large" id="startTimerBtn" onclick="toggleTimer()">
+                        <i class="fa-solid fa-play"></i> Başlat
+                    </button>
+                    <button class="btn btn-glass btn-large" onclick="resetTimer()" title="Sıfırla">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="habits" class="section">
+            <div class="header">
+                <div>
+                    <h1>Alışkanlıklar & Bağımlılıklar</h1>
+                    <p class="date-display">Zinciri kırma, istatistiklerini takip et.</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('habitModal')">
+                    <i class="fa-solid fa-plus"></i> Yeni Ekle
+                </button>
+            </div>
+            <div class="habit-grid" id="habit-grid"></div>
+        </section>
+
+        <div id="miniTasksWidget" class="mini-tasks-widget glass" style="display: none;">
+            <div class="mini-tasks-header">
+                <h3><i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Görevler</h3>
+            </div>
+            <div class="mini-tasks-body" id="mini-tasks-list">
+                </div>
+            <div class="mini-tasks-footer">
+                <i class="fa-solid fa-plus" style="color: var(--text-muted);"></i>
+                <input type="text" id="quickTaskInput" class="form-control" placeholder="Görev ekle (Enter'a bas)" onkeypress="handleQuickTaskAdd(event)">
+            </div>
+        </div>
+
+    </main>
+
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2 id="taskModalTitle">Yeni Görev</h2>
+                <button class="btn-icon" onclick="closeModal('taskModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="taskForm" onsubmit="handleTaskSubmit(event)">
+                <input type="hidden" id="taskId">
+                <div class="form-group">
+                    <label>Görev Adı *</label>
+                    <input type="text" id="taskTitle" class="form-control" required placeholder="Ne yapılmalı?">
+                </div>
+                <div class="form-group">
+                    <label>Açıklama (Opsiyonel)</label>
+                    <textarea id="taskDesc" class="form-control" rows="2" placeholder="Detaylar, notlar..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <select id="taskCategory" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Öncelik</label>
+                        <select id="taskPriority" class="form-control">
+                            <option value="low">Düşük</option>
+                            <option value="med" selected>Orta</option>
+                            <option value="high">Yüksek</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Görev Bitiş Tarihi *</label>
+                        <input type="date" id="taskDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Görev Saati (Opsiyonel)</label>
+                        <input type="time" id="taskTime" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group checkbox-group" style="margin-top: 10px; margin-bottom: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                    <input type="checkbox" id="taskReminder" onchange="toggleReminderInputs()">
+                    <label for="taskReminder" style="color: var(--primary);">Özel Hatırlatıcı Kur (Alarm ve Bildirim)</label>
+                </div>
+                
+                <div id="reminderInputsDiv" class="form-row" style="display: none; background: var(--input-bg); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>Hatırlatılacak Tarih *</label>
+                        <input type="date" id="reminderDate" class="form-control">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>Hatırlatılacak Saat *</label>
+                        <input type="time" id="reminderTime" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tekrar Durumu</label>
+                    <select id="taskRecurrence" class="form-control">
+                        <option value="none">Tekrar Etme</option>
+                        <option value="daily">Her Gün</option>
+                        <option value="weekly">Haftalık</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-glass flex-1 center-text" onclick="closeModal('taskModal')">İptal</button>
+                    <button type="submit" class="btn btn-primary flex-2 center-text">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2>Kategori Yönetimi</h2>
+                <button class="btn-icon" onclick="closeModal('categoryModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="categoryForm" onsubmit="handleCategorySubmit(event)">
+                <div class="form-row">
+                    <div class="form-group flex-3">
+                        <label>Kategori Adı</label>
+                        <input type="text" id="catName" class="form-control" required placeholder="Örn: Finans">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label>Emoji</label>
+                        <input type="text" id="catEmoji" class="form-control text-center" value="📌" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tema Rengi</label>
+                    <input type="color" id="catColor" class="form-control color-picker" value="#4F8CFF">
+                </div>
+                <button type="submit" class="btn btn-primary w-full center-text mt-10">Ekle / Güncelle</button>
+            </form>
+            <div class="mt-24">
+                <label class="text-sm text-muted mb-8 d-block">Mevcut Kategoriler</label>
+                <div id="categoryListContainer" class="flex-wrap gap-8"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="habitModal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2>Yeni Alışkanlık</h2>
+                <button class="btn-icon" onclick="closeModal('habitModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="habitForm" onsubmit="handleHabitSubmit(event)">
+                <div class="form-group">
+                    <label>Alışkanlık Adı</label>
+                    <input type="text" id="habitName" class="form-control" required placeholder="Örn: 10.000 Adım At">
+                </div>
+                <div class="form-group">
+                    <label>Temsili Emoji</label>
+                    <input type="text" id="habitEmoji" class="form-control" value="🌟" required>
+                </div>
+                <div class="form-actions mt-24">
+                    <button type="button" class="btn btn-glass flex-1 center-text" onclick="closeModal('habitModal')">İptal</button>
+                    <button type="submit" class="btn btn-primary flex-2 center-text">Başlat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2>Sistem Ayarları & Yedekleme</h2>
+                <button class="btn-icon" onclick="closeModal('settingsModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="glass" style="padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 12px;"><i class="fa-solid fa-download"></i> Verileri Dışa Aktar</h3>
+                <p class="text-sm text-muted mb-8">Görevleriniz, alışkanlıklarınız ve kategorilerinizi yedekleyin.</p>
+                <button class="btn btn-primary w-full center-text" onclick="exportData()">Yedeği İndir (.json)</button>
+            </div>
+
+            <div class="glass" style="padding: 20px; border-radius: 12px; border: 1px solid var(--warning);">
+                <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--warning);"><i class="fa-solid fa-upload"></i> Verileri İçe Aktar</h3>
+                <p class="text-sm text-muted mb-8">Daha önce aldığınız bir yedeği yükleyin. <strong style="color:var(--danger)">Mevcut verilerinizin üzerine yazılır!</strong></p>
+                <input type="file" id="importFile" accept=".json" class="form-control" style="margin-bottom: 10px;">
+                <button class="btn btn-glass w-full center-text" onclick="importData()" style="color: var(--warning); border-color: var(--warning);">Yedeği Yükle</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+    <script src="script.js"></script>
+</body>
+</html>
